@@ -1,0 +1,41 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function App() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [balance, setBalance] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token'));
+
+    const register = async () => {
+        await axios.post('http://localhost:5000/register', { username, password });
+        alert('Регистрация успешна!');
+    };
+
+    const login = async () => {
+        const res = await axios.post('http://localhost:5000/login', { username, password });
+        localStorage.setItem('token', res.data.token);
+        setToken(res.data.token);
+    };
+
+    const getBalance = async () => {
+        const res = await axios.get('http://localhost:5000/balance', {
+            headers: { Authorization: token }
+        });
+        setBalance(res.data.balance);
+    };
+
+    return (
+        <div className="p-5 max-w-md mx-auto">
+            <h2 className="text-2xl font-bold mb-4">Банк</h2>
+            <input className="border p-2 w-full mb-2" placeholder="Имя" value={username} onChange={e => setUsername(e.target.value)} />
+            <input className="border p-2 w-full mb-2" type="password" placeholder="Пароль" value={password} onChange={e => setPassword(e.target.value)} />
+            <button className="bg-blue-500 text-white p-2 w-full mb-2" onClick={register}>Регистрация</button>
+            <button className="bg-green-500 text-white p-2 w-full mb-2" onClick={login}>Вход</button>
+            {token && <button className="bg-gray-500 text-white p-2 w-full mb-2" onClick={getBalance}>Показать баланс</button>}
+            {balance !== null && <p className="mt-2">Ваш баланс: {balance} руб.</p>}
+        </div>
+    );
+}
+
+export default App;
